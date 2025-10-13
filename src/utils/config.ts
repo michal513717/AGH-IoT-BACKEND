@@ -1,0 +1,6 @@
+
+
+export const APPLICATION_CONFIG = {
+  DEBUG_REQUEST: false,
+  APPLY_AUTH_MIDDLEWARE: false,
+}
