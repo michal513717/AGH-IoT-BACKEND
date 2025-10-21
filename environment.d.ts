@@ -9,6 +9,8 @@ declare global {
             FIREBASE_APP_ID: string;
             FIREBASE_MEASUREMENT_ID: string;
             JWT_SECRET: string;
+            MONGODB_URI: string;
+            MONGODB_DB_NAME: string;
         }
     }
 }
