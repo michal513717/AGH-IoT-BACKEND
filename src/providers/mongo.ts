@@ -1,8 +1,17 @@
 import mongoose from 'mongoose';
 
-export const getMongoClient = async (uri: string): Promise<typeof mongoose> => {
+export const getMongoClient = async (): Promise<typeof mongoose> => {
     try {
-        const client = await mongoose.connect(uri, { dbName: process.env.MONGODB_DB_NAME });       
+        const mongoUri = process.env.MONGODB_URI;
+
+        if (!mongoUri) {
+            throw new Error('MONGODB_URI environment variable is not set');
+        }
+        
+        const client = await mongoose.connect(mongoUri, { 
+            dbName: process.env.MONGODB_DB_NAME || 'defaultdb' 
+        });
+
         console.info("MongoDB connected");
 
         return client;

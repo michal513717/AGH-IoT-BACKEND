@@ -4,6 +4,8 @@ import { configureNotValidRoute, debugRequest } from './utils/requests';
 import { APPLICATION_CONFIG } from './utils/config';
 import { getFirebaseClient } from './providers/firebase';
 import { mainController } from './controllers/main';
+import { getMongoClient } from './providers/mongo';
+import { DiodeRepository, LightIntensityRepository, TemperatureRepository, WaterLevelRepository } from './repositories/repository';
 
 dotenv.config();
 
@@ -15,12 +17,26 @@ async function main() {
 
     try {
         const firebaseClient = await getFirebaseClient()
+        const mongoClient = await getMongoClient();
+
+        const diodeRepository = new DiodeRepository();
+        const lightIntensityRepository = new LightIntensityRepository();
+        const temperatureRepository = new TemperatureRepository();
+        const waterLevelRepository = new WaterLevelRepository();
 
         if(APPLICATION_CONFIG.DEBUG_REQUEST === true){ 
             debugRequest(app);
         }
 
-        app.get('/', mainController);
+        app.get('/', () => {
+            diodeRepository.create({ status: true, date: new Date() });
+            lightIntensityRepository.create({ value: 100, date: new Date() });
+            temperatureRepository.create({ value: 25, date: new Date() });
+            waterLevelRepository.create({ value: 50, date: new Date() });
+
+            console.info('Ping received');
+            return 'IoT Backend is running';
+        });
         
         configureNotValidRoute(app);
 
