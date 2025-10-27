@@ -1,61 +1,68 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import firebaseService from '../providers/firebase';
+import { ResponseHelper, ErrorCode } from '../utils/response';
 
-export interface AuthenticatedRequest extends Request {
-  user?: any;
-}
-
-export const verifyToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const verifyLocalJwtToken = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({ 
-        error: 'Access denied', 
-        message: 'No token provided' 
-      });
-    }
-
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      return res.status(401).json({ 
-        error: 'Access denied', 
-        message: 'No token provided' 
-      });
-    }
+    const token = extractToken(req.headers.authorization);
 
     const jwtSecret = process.env.JWT_SECRET;
+
     if (!jwtSecret) {
-      console.error('JWT_SECRET environment variable is not set');
-      return res.status(500).json({ 
-        error: 'Server configuration error',
-        message: 'JWT secret not configured' 
-      });
+      return ResponseHelper.authError(res, ErrorCode.JWT_SECRET_MISSING);
     }
 
-    const decoded = jwt.verify(token, jwtSecret);
-    
+    jwt.verify(token, jwtSecret);
+
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(403).json({ 
-        error: 'Forbidden', 
-        message: 'Invalid token' 
-      });
+      return ResponseHelper.authError(res, ErrorCode.INVALID_TOKEN, 'Invalid JWT token');
     }
-    
+
     if (error instanceof jwt.TokenExpiredError) {
-      return res.status(403).json({ 
-        error: 'Forbidden', 
-        message: 'Token expired' 
-      });
+      return ResponseHelper.authError(res, ErrorCode.TOKEN_EXPIRED, 'JWT token has expired');
     }
 
     console.error('JWT verification error:', error);
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: 'Token verification failed' 
-    });
+    return ResponseHelper.authError(res, ErrorCode.JWT_VERIFICATION_FAILED);
+  }
+};
+
+
+export const verifyFirebaseToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = extractToken(req.headers.authorization);
+
+    const auth = await firebaseService.getAuth();
+    const decodedToken = await auth.verifyIdToken(token);
+
+    console.info('Firebase token verified:');
+    console.info(decodedToken);
+
+    next();
+  } catch (error: any) {
+    return ResponseHelper.firebaseError(res, error);
+  }
+};
+
+
+const extractToken = (authHeader: string | undefined): string => {
+  try {
+    if (!authHeader) {
+      throw new Error('Authorization header not found');
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    if (!token) {
+      throw new Error('Token not found in Authorization header');
+    }
+
+    return token;
+  } catch (err) {
+    console.error('Error extracting token:', err);
+    throw err;
   }
 };
