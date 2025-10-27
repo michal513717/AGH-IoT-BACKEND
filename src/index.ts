@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import express from 'express';
 import { configureNotValidRoute, debugRequest } from './utils/requests';
 import { APPLICATION_CONFIG } from './utils/config';
-import { getFirebaseClient } from './providers/firebase';
+import firebaseService from './providers/firebase';
 import { mainController } from './controllers/main';
 import { getMongoClient } from './providers/mongo';
 import { DiodeRepository, LightIntensityRepository, TemperatureRepository, WaterLevelRepository } from './repositories/repository';
@@ -16,7 +16,7 @@ async function main() {
     app.use(express.json());
 
     try {
-        const firebaseClient = await getFirebaseClient()
+        firebaseService.initialize();
         const mongoClient = await getMongoClient();
 
         const diodeRepository = new DiodeRepository();
