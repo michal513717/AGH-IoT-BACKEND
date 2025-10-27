@@ -3,9 +3,10 @@ import express from 'express';
 import { configureNotValidRoute, debugRequest } from './utils/requests';
 import { APPLICATION_CONFIG } from './utils/config';
 import firebaseService from './providers/firebase';
-import { mainController } from './controllers/main';
 import { getMongoClient } from './providers/mongo';
-import { DiodeRepository, LightIntensityRepository, TemperatureRepository, WaterLevelRepository } from './repositories/repository';
+import { DiodeRepository, HumidityRepository, LightIntensityRepository, TemperatureRepository, WaterLevelRepository } from './repositories/repository';
+import authRoutes from './routes/auth.routes';
+import databaseRoutes from './routes/database.routes';
 
 dotenv.config();
 
@@ -23,16 +24,23 @@ async function main() {
         const lightIntensityRepository = new LightIntensityRepository();
         const temperatureRepository = new TemperatureRepository();
         const waterLevelRepository = new WaterLevelRepository();
+        const humidityRepository = new HumidityRepository();
 
         if(APPLICATION_CONFIG.DEBUG_REQUEST === true){ 
             debugRequest(app);
         }
 
-        app.get('/', () => {
+        app.use('/auth', authRoutes);
+        app.use('/api/db', databaseRoutes);
+
+        // Root endpoint for basic testing
+        app.get('/', (req, res) => {
+
             diodeRepository.create({ status: true, date: new Date() });
             lightIntensityRepository.create({ value: 100, date: new Date() });
             temperatureRepository.create({ value: 25, date: new Date() });
             waterLevelRepository.create({ value: 50, date: new Date() });
+            humidityRepository.create({ value: 60, date: new Date() });
 
             console.info('Ping received');
             return 'IoT Backend is running';
