@@ -17,6 +17,7 @@ export type DiodeStatusRecord = Document & {
 export type LightIntensityRecord = MongoCollectionRecord<number>;
 export type TemperatureRecord = MongoCollectionRecord<number>;
 export type WaterLevelRecord = MongoCollectionRecord<number>;
+export type HumidityRecord = MongoCollectionRecord<number>;
 
 export const DiodeStatusSchema = new Schema<DiodeStatusRecord>({
     status: { type: Boolean, required: true },
@@ -40,6 +41,13 @@ export const TemperatureSchema = new Schema<MongoCollectionRecord<number>>({
 });
 
 export const WaterLevelSchema = new Schema<MongoCollectionRecord<number>>({
+    value: { type: Number, required: true },
+    date: { type: Date, required: true }
+}, {
+    versionKey: false
+});
+
+export const HumiditySchema = new Schema<MongoCollectionRecord<number>>({
     value: { type: Number, required: true },
     date: { type: Date, required: true }
 }, {
