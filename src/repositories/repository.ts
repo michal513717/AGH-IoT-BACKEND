@@ -1,5 +1,5 @@
 import mongoose, { Model, ClientSession, Document, FilterQuery } from "mongoose";
-import { DiodeStatusRecord, DiodeStatusSchema, LightIntensityRecord, LightIntensitySchema, TemperatureRecord, TemperatureSchema, WaterLevelRecord, WaterLevelSchema } from "../models/mongo.schema";
+import { DiodeStatusRecord, DiodeStatusSchema, HumidityRecord, HumiditySchema, LightIntensityRecord, LightIntensitySchema, TemperatureRecord, TemperatureSchema, WaterLevelRecord, WaterLevelSchema } from "../models/mongo.schema";
 
 export abstract class BaseRepository<T extends Document> {
   protected model: Model<T>;
@@ -84,5 +84,12 @@ export class WaterLevelRepository extends BaseRepository<WaterLevelRecord> {
   constructor() {
     const waterLevelModel = mongoose.model<WaterLevelRecord>("WaterLevel", WaterLevelSchema, 'water_level_collection');
     super(waterLevelModel);
+  }
+}
+
+export class HumidityRepository extends BaseRepository<HumidityRecord> {  
+  constructor() {
+    const humidityModel = mongoose.model<HumidityRecord>("Humidity", HumiditySchema, 'humidity_collection');
+    super(humidityModel);
   }
 }
