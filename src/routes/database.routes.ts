@@ -13,7 +13,9 @@ import {
 const router = Router();
 
 // Database health and stats
-router.get('/health', verifyLocalJwtToken, DatabaseController.healthCheck);
+router.get('/health', DatabaseController.healthCheck);
+router.get('/health-token', verifyLocalJwtToken, DatabaseController.healthCheck);
+
 
 // Diodes endpoints
 router.get('/diodes', DatabaseController.getAllDiodes);
