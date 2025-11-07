@@ -53,6 +53,34 @@ export class DatabaseController {
   }
 
   /**
+   * Generic function to create a new record
+   */
+  private static async createRecord(
+    repo: BaseRepository<any>,
+    resourceName: string,
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const data = req.body;
+
+      // Add date if not provided
+      if (!data.date) {
+        data.date = new Date();
+      }
+
+      const record = await repo.create(data);
+
+      return ResponseHelper.success(res, {
+        data: record
+      }, `${resourceName} created successfully`, 201);
+
+    } catch (error) {
+      return ResponseHelper.databaseError(res, error, `Failed to create ${resourceName.toLowerCase()}`);
+    }
+  }
+
+  /**
    * Generic function to get records by date range from any repository
    */
   private static async getRecordsByDateRange(
@@ -120,12 +148,18 @@ export class DatabaseController {
   static getDiodesByDateRange = (req: Request, res: Response) => 
     DatabaseController.getRecordsByDateRange(DatabaseController.repositories.diodes, 'Diodes', req, res);
 
+  static createDiode = (req: Request, res: Response) => 
+    DatabaseController.createRecord(DatabaseController.repositories.diodes, 'Diode', req, res);
+
   // Light intensity endpoints
   static getAllLightIntensity = (req: Request, res: Response) => 
     DatabaseController.getAllRecords(DatabaseController.repositories.lightIntensity, 'Light intensity records', req, res);
 
   static getLightIntensityByDateRange = (req: Request, res: Response) => 
     DatabaseController.getRecordsByDateRange(DatabaseController.repositories.lightIntensity, 'Light intensity records', req, res);
+
+  static createLightIntensity = (req: Request, res: Response) => 
+    DatabaseController.createRecord(DatabaseController.repositories.lightIntensity, 'Light intensity record', req, res);
 
   // Temperature endpoints
   static getAllTemperatures = (req: Request, res: Response) => 
@@ -134,6 +168,9 @@ export class DatabaseController {
   static getTemperaturesByDateRange = (req: Request, res: Response) => 
     DatabaseController.getRecordsByDateRange(DatabaseController.repositories.temperatures, 'Temperature records', req, res);
 
+  static createTemperature = (req: Request, res: Response) => 
+    DatabaseController.createRecord(DatabaseController.repositories.temperatures, 'Temperature record', req, res);
+
   // Water level endpoints
   static getAllWaterLevels = (req: Request, res: Response) => 
     DatabaseController.getAllRecords(DatabaseController.repositories.waterLevels, 'Water level records', req, res);
@@ -141,12 +178,18 @@ export class DatabaseController {
   static getWaterLevelsByDateRange = (req: Request, res: Response) => 
     DatabaseController.getRecordsByDateRange(DatabaseController.repositories.waterLevels, 'Water level records', req, res);
 
+  static createWaterLevel = (req: Request, res: Response) => 
+    DatabaseController.createRecord(DatabaseController.repositories.waterLevels, 'Water level record', req, res);
+
   // Humidity endpoints
   static getAllHumidities = (req: Request, res: Response) => 
     DatabaseController.getAllRecords(DatabaseController.repositories.humidities, 'Humidity records', req, res);
 
   static getHumiditiesByDateRange = (req: Request, res: Response) => 
     DatabaseController.getRecordsByDateRange(DatabaseController.repositories.humidities, 'Humidity records', req, res);
+
+  static createHumidity = (req: Request, res: Response) => 
+    DatabaseController.createRecord(DatabaseController.repositories.humidities, 'Humidity record', req, res);
 
   static healthCheck = async (req: Request, res: Response) => {
     try {

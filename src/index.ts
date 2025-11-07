@@ -43,7 +43,8 @@ async function main() {
             humidityRepository.create({ value: 60, date: new Date() });
 
             console.info('Ping received');
-            return 'IoT Backend is running';
+            
+            res.send('IoT Backend is running');
         });
         
         configureNotValidRoute(app);
